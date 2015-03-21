@@ -1,0 +1,82 @@
+containers:
+  etcd:
+    image: coreos/etcd:v0.4.6
+    run:
+      detach: true
+      publish:
+        - 7001:7001
+        - 4001:4001
+      cmd:
+        - --addr=172.17.42.1:4001
+        - --peer-addr=172.17.42.1:7001
+  
+  skydns:
+    image: skynetservices/skydns:latest
+    run:
+      detach: true
+      publish:
+        - 53:53
+        - 53:53/udp
+      env:
+        - ETCD_MACHINES=http://172.17.42.1:4001
+        - SKYDNS_NAMESERVERS=8.8.8.8:53,8.8.4.4:53
+        - SKYDNS_ADDR=0.0.0.0:53
+        - SERVICE_ID=skydns
+        - SERVICE_NAME=dns
+
+  registrator:
+    image: progrium/registrator
+    run:
+      detach: true
+      hostname: registrator
+      env:
+        - SERVICE_ID=registrator
+        - SERVICE_NAME=discovery
+      volume:
+        - /var/run/docker.sock:/tmp/docker.sock
+      cmd:
+        - skydns2://172.17.42.1:4001/skydns.local
+        - etcd://172.17.42.1:4001/services
+
+  registrator2:
+    image: progrium/registrator
+    run:
+      detach: true
+      hostname: registrator
+      env:
+        - SERVICE_NAME=discovery
+      volume:
+        - /var/run/docker.sock:/tmp/docker.sock
+      cmd:
+        - etcd://172.17.42.1:4001/services
+
+  nginx.01:
+    image: nginx
+    run:
+      detach: true
+      env:
+        - SERVICE_ID=nginx.01
+        - SERVICE_NAME=web
+      publish:
+        - 5000:80
+  
+  nginx.02:
+    image: nginx
+    run:
+      detach: true
+      env:
+        - SERVICE_ID=nginx.02
+        - SERVICE_NAME=web
+      publish:
+        - 5001:80
+
+  redis:
+    image: redis
+    run:
+      detach: true
+      publish: 
+        - 6379:6379
+      env:
+        - SERVICE_ID=redis
+        - SERVICE_NAME=redis
+
