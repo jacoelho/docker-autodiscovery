@@ -7,6 +7,9 @@
 
 ## Usage:
 
+```dig @$(boot2docker ip) SRV skydns.local```
+
 ```dig @$(boot2docker ip) SRV web.skydns.local```
 
-```dig @$(boot2docker ip) SRV skydns.local```
+```dig @$(boot2docker ip) web.skydns.local```
+
