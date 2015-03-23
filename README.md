@@ -5,17 +5,16 @@
 - [crane](https://github.com/michaelsauter/crane)
 
 ### containers:
-- [etcd] (https://github.com/coreos/etcd)
-- [skydns2] (https://github.com/skynetservices/skydns)
+- [consul] (https://github.com/coreos/etcd)
 - [registrator] (https://github.com/gliderlabs/registrator)
 
 ## Usage:
 
 ```crane lift```
 
-```dig @$(boot2docker ip) SRV skydns.local```
+```dig @$(boot2docker ip) web.service.consul A```
 
-```dig @$(boot2docker ip) SRV web.skydns.local```
+```dig @$(boot2docker ip) redis.service.consul A```
 
-```dig @$(boot2docker ip) web.skydns.local```
+```curl $(boot2docker ip)```
 
