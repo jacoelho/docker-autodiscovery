@@ -1,0 +1,1 @@
+FROM jacoelho/consul-nginx
