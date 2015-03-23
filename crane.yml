@@ -1,28 +1,16 @@
 containers:
-  etcd:
-    image: coreos/etcd:v0.4.6
+  consul:
+    image: progrium/consul
     run:
       detach: true
       publish:
-        - 7001:7001
-        - 4001:4001
-      cmd:
-        - --addr=172.17.42.1:4001
-        - --peer-addr=172.17.42.1:7001
-  
-  skydns:
-    image: skynetservices/skydns:latest
-    run:
-      detach: true
-      publish:
+        - 8500:8500
         - 53:53
         - 53:53/udp
-      env:
-        - ETCD_MACHINES=http://172.17.42.1:4001
-        - SKYDNS_NAMESERVERS=8.8.8.8:53,8.8.4.4:53
-        - SKYDNS_ADDR=0.0.0.0:53
-        - SERVICE_ID=skydns
-        - SERVICE_NAME=dns
+      cmd:
+        - -server
+        - -bootstrap 
+        - -ui-dir /ui
 
   registrator:
     image: progrium/registrator
@@ -35,41 +23,53 @@ containers:
       volume:
         - /var/run/docker.sock:/tmp/docker.sock
       cmd:
-        - skydns2://172.17.42.1:4001/skydns.local
-        - etcd://172.17.42.1:4001/services
+        - -internal=true
+        - consul://172.17.42.1:8500
 
-  registrator2:
-    image: progrium/registrator
-    run:
-      detach: true
-      hostname: registrator
-      env:
-        - SERVICE_NAME=discovery
-      volume:
-        - /var/run/docker.sock:/tmp/docker.sock
-      cmd:
-        - etcd://172.17.42.1:4001/services
-
-  nginx.01:
-    image: nginx
+  proxy.01:
+    image: proxy:local
+    dockerfile: reverse-proxy/ 
     run:
       detach: true
       env:
-        - SERVICE_ID=nginx.01
-        - SERVICE_NAME=web
+        - SERVICE_ID=proxy.01
+        - SERVICE_NAME=proxy
       publish:
-        - 5000:80
+        - 80:80
+
+  web.01:
+    image: jacoelho/busyweb
+    run:
+      detach: true
+      env:
+        - SERVICE_ID=web.01
+        - SERVICE_NAME=web
+        - SERVICE_TAGS=microservice01
+      publish:
+        - 80
   
-  nginx.02:
-    image: nginx
+  web.02:
+    image: jacoelho/busyweb
     run:
       detach: true
       env:
-        - SERVICE_ID=nginx.02
+        - SERVICE_ID=web.02
         - SERVICE_NAME=web
+        - SERVICE_TAGS=microservice01
       publish:
-        - 5001:80
+        - 80
 
+  web.03:
+    image: jacoelho/busyweb
+    run:
+      detach: true
+      env:
+        - SERVICE_ID=web.03
+        - SERVICE_NAME=web
+        - SERVICE_TAGS=microservice02
+      publish:
+        - 80
+  
   redis:
     image: redis
     run:
