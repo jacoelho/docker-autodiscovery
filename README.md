@@ -1,12 +1,15 @@
 # docker-autodiscovery
 
+dynamic reverse proxy based on tags and dns based for other services
+
 ### tools:
 - [boot2docker](http://boot2docker.io/)
 - [crane](https://github.com/michaelsauter/crane)
 
 ### containers:
-- [consul] (https://github.com/coreos/etcd)
+- [consul] (https://www.consul.io/)
 - [registrator] (https://github.com/gliderlabs/registrator)
+- [consul-template] (https://github.com/hashicorp/consul-template)
 
 ## Usage:
 
