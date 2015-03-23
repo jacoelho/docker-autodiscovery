@@ -28,7 +28,7 @@ containers:
 
   proxy.01:
     image: proxy:local
-    dockerfile: reverse-proxy/ 
+    dockerfile: proxy/ 
     run:
       detach: true
       env:
